@@ -1,0 +1,62 @@
+server:
+  port: 8082
+
+spring:
+  config:
+    import: optional:dotenv:../.env
+  application:
+    name: profile-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/hireconnect_profile_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    ip-address: 127.0.0.1
+    instance-id: ${spring.application.name}:${server.port}
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 86400000
+
+logging:
+  file:
+    path: ../logs/profile-service
+  level:
+    root: INFO
+    com.hireconnect.profileservice: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: WARN
+spring.cloud.compatibility-verifier.enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always

@@ -1,0 +1,186 @@
+server:
+  port: 8080
+
+spring:
+  config:
+    import: optional:dotenv:../.env
+  application:
+    name: api-gateway
+
+  servlet:
+    multipart:
+      enabled: false
+
+  cloud:
+    compatibility-verifier:
+      enabled: false
+
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: auth-service
+              uri: lb://AUTH-SERVICE
+              predicates:
+                - Path=/api/v1/auth/**
+
+            - id: auth-service-admin-users
+              uri: lb://AUTH-SERVICE
+              predicates:
+                - Path=/api/admin/users/**
+
+            - id: auth-service-oauth2-authorize
+              uri: lb://AUTH-SERVICE
+              predicates:
+                - Path=/oauth2/**
+
+            - id: auth-service-oauth2-callback
+              uri: lb://AUTH-SERVICE
+              predicates:
+                - Path=/login/oauth2/**
+
+            - id: profile-service
+              uri: lb://PROFILE-SERVICE
+              predicates:
+                - Path=/api/profiles/**
+
+            - id: job-service
+              uri: lb://JOB-SERVICE
+              predicates:
+                - Path=/api/jobs/**
+
+            - id: application-service
+              uri: lb://APPLICATION-SERVICE
+              predicates:
+                - Path=/api/applications/**
+
+            - id: interview-service
+              uri: lb://INTERVIEW-SERVICE
+              predicates:
+                - Path=/api/interviews/**
+
+            - id: notification-service
+              uri: lb://NOTIFICATION-SERVICE
+              predicates:
+                - Path=/api/notifications,/api/notifications/**
+
+            - id: payment-service
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/payments/**
+
+            - id: analytics-service
+              uri: lb://ANALYTICS-SERVICE
+              predicates:
+                - Path=/api/analytics/**
+
+            - id: auth-service-docs
+              uri: lb://AUTH-SERVICE
+              predicates:
+                - Path=/aggregate/auth/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+
+            - id: profile-service-docs
+              uri: lb://PROFILE-SERVICE
+              predicates:
+                - Path=/aggregate/profile/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+
+            - id: job-service-docs
+              uri: lb://JOB-SERVICE
+              predicates:
+                - Path=/aggregate/job/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+
+            - id: application-service-docs
+              uri: lb://APPLICATION-SERVICE
+              predicates:
+                - Path=/aggregate/application/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+
+            - id: interview-service-docs
+              uri: lb://INTERVIEW-SERVICE
+              predicates:
+                - Path=/aggregate/interview/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+
+            - id: notification-service-docs
+              uri: lb://NOTIFICATION-SERVICE
+              predicates:
+                - Path=/aggregate/notification/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+
+            - id: payment-service-docs
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/aggregate/payment/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+
+            - id: analytics-service-docs
+              uri: lb://ANALYTICS-SERVICE
+              predicates:
+                - Path=/aggregate/analytics/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    ip-address: 127.0.0.1
+    instance-id: ${spring.application.name}:${server.port}
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"   # <-- This exposes all actuator endpoints, like /actuator/health
+  endpoint:
+    health:
+      show-details: always
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 86400000
+
+logging:
+  file:
+    path: ../logs/api-gateway
+  level:
+    com.hireconnect.apigateway: INFO
+    org.springframework.security: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: auth-service
+        url: /aggregate/auth/v3/api-docs
+      - name: profile-service
+        url: /aggregate/profile/v3/api-docs
+      - name: job-service
+        url: /aggregate/job/v3/api-docs
+      - name: application-service
+        url: /aggregate/application/v3/api-docs
+      - name: interview-service
+        url: /aggregate/interview/v3/api-docs
+      - name: notification-service
+        url: /aggregate/notification/v3/api-docs
+      - name: payment-service
+        url: /aggregate/payment/v3/api-docs
+      - name: analytics-service
+        url: /aggregate/analytics/v3/api-docs

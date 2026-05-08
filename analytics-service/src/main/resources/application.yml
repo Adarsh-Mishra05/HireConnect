@@ -1,0 +1,38 @@
+server:
+  port: 8088
+
+spring:
+  config:
+    import: optional:dotenv:../.env
+  application:
+    name: analytics-service
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    ip-address: 127.0.0.1
+    instance-id: ${spring.application.name}:${server.port}
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 86400000
+
+logging:
+  file:
+    path: ../logs/analytics-service
+
+spring.cloud.compatibility-verifier.enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always

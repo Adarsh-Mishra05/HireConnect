@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # Redis Service
+  redis:
+    image: redis:7-alpine
+    container_name: hireconnect-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - hireconnect-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # Redis Commander (UI for Redis)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-commander
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8088:8081"
+    networks:
+      - hireconnect-network
+    depends_on:
+      - redis
+
+  # SonarQube Service
+  sonarqube:
+    image: sonarqube:10.4-community
+    container_name: sonarqube
+    ports:
+      - "9000:9000"
+    env_file:
+      - .env
+    environment:
+      - SONAR_JDBC_URL=${SONAR_JDBC_URL}
+      - SONAR_JDBC_USERNAME=${SONAR_JDBC_USERNAME}
+      - SONAR_JDBC_PASSWORD=${SONAR_JDBC_PASSWORD}
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=${SONAR_ES_BOOTSTRAP_CHECKS_DISABLE:-true}
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    depends_on:
+      - sonar-db
+    networks:
+      - hireconnect-network
+
+  # Sonar Database
+  sonar-db:
+    image: postgres:15
+    container_name: sonar-db
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+    networks:
+      - hireconnect-network
+
+volumes:
+  redis-data:
+  sonarqube_data:
+  sonarqube_logs:
+  sonarqube_extensions:
+  postgresql_data:
+
+networks:
+  hireconnect-network:
+    driver: bridge

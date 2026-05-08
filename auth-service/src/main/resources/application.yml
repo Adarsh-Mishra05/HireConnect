@@ -1,0 +1,99 @@
+server:
+  port: 8081
+
+spring:
+  config:
+    import: optional:dotenv:../.env
+  application:
+    name: auth-service
+
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/hireconnect_auth_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - openid
+              - profile
+              - email
+            redirect-uri: "http://localhost:8080/login/oauth2/code/google"
+          github:
+            client-id: ${GITHUB_CLIENT_ID}
+            client-secret: ${GITHUB_CLIENT_SECRET}
+            scope:
+              - user:email
+              - read:user
+            redirect-uri: "http://localhost:8080/login/oauth2/code/github"
+
+auth:
+  oauth-gateway-base-url: http://localhost:8080
+  oauth-success-redirect-url: http://localhost:4200/oauth-success
+  oauth-failure-redirect-url: http://localhost:4200/login
+  reset-otp-expiration-minutes: 10
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    ip-address: 127.0.0.1
+    instance-id: ${spring.application.name}:${server.port}
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+# BUG FIX 5: Removed the duplicate app.jwt.* block that was never read by any
+# @Value annotation. JwtService uses jwt.secret and jwt.expiration (this block).
+# Having two blocks with the same defaults caused confusion about which was active.
+jwt:
+  # IMPORTANT: In production, always override JWT_SECRET with a strong random
+  # secret of at least 32 characters (256 bits for HMAC-SHA256).
+  secret: ${JWT_SECRET}
+  expiration: 86400000        # 24 hours in milliseconds — access token TTL
+  refresh-expiration: 604800000  # 7 days in milliseconds — refresh token TTL
+
+app:
+  kafka:
+    notification-topic: hireconnect-notifications
+
+logging:
+  file:
+    path: ../logs/auth-service
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+
+spring.cloud.compatibility-verifier.enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
