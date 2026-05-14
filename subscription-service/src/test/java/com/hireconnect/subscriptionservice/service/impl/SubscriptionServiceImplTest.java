@@ -109,6 +109,8 @@ class SubscriptionServiceImplTest {
     void testSubscribe_AlreadyActive() {
         SubscribeRequestDto requestDto = new SubscribeRequestDto();
         requestDto.setPlan(PlanTier.PROFESSIONAL);
+        requestDto.setPaymentMode(PaymentMode.CARD);
+        requestDto.setTransactionId("txn_existing");
 
         when(subscriptionRepository.findFirstByRecruiterIdAndActiveTrueOrderByCreatedAtDesc(1L))
                 .thenReturn(Optional.of(activeSubscription));

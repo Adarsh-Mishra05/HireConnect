@@ -9,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,10 +41,18 @@ public class AdminAuthController {
     public ResponseEntity<AdminUserResponse> updateUserActiveStatus(
             @AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable Long userId,
-            @RequestParam boolean active
+            @RequestParam(required = false) Boolean active,
+            @RequestBody(required = false) UpdateUserStatusRequest request
     ) {
+        Boolean resolvedActive = active != null ? active : (request != null ? request.active() : null);
+        if (resolvedActive == null) {
+            throw new RuntimeException("Missing required 'active' value. Provide query param or JSON body.");
+        }
+
         log.info("Admin user status update request received by userId={} for targetUserId={} active={}",
-                user != null ? user.userId() : null, userId, active);
-        return ResponseEntity.ok(authService.updateUserActiveStatus(user, userId, active));
+                user != null ? user.userId() : null, userId, resolvedActive);
+        return ResponseEntity.ok(authService.updateUserActiveStatus(user, userId, resolvedActive));
     }
+
+    public record UpdateUserStatusRequest(Boolean active) {}
 }

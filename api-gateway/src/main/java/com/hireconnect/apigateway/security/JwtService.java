@@ -5,6 +5,7 @@ import java.util.Date;
 
 import javax.crypto.SecretKey;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,16 @@ public class JwtService {
 
     @Value("${jwt.secret}")
     private String secret;
+
+    @PostConstruct
+    void validateSecret() {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("JWT secret is missing in api-gateway. Set JWT_SECRET in environment.");
+        }
+        if (secret.length() < 32) {
+            throw new IllegalStateException("JWT secret in api-gateway must be at least 32 characters.");
+        }
+    }
 
     private SecretKey getSignKey() {
         log.debug("Generating JWT signing key for token validation");

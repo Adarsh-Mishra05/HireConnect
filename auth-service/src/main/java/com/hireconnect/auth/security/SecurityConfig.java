@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.hireconnect.auth.client.NotificationServiceClient;
 import com.hireconnect.auth.repository.AuthRepository;
 import com.hireconnect.auth.service.RefreshTokenService;
 
@@ -26,15 +27,16 @@ public class SecurityConfig {
             AuthRepository authRepository,
             JwtService jwtService,
             RefreshTokenService refreshTokenService,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            NotificationServiceClient notificationServiceClient
     ) {
-        // BUG FIX 6 (cont): Pass failureRedirectUrl so the handler can redirect
         // to the correct failure page instead of the success page with ?error=
         return new OAuth2AuthenticationSuccessHandler(
                 authRepository,
                 jwtService,
                 refreshTokenService,
                 passwordEncoder,
+                notificationServiceClient,
                 successRedirectUrl,
                 failureRedirectUrl
         );

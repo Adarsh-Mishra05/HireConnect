@@ -26,10 +26,15 @@ import com.hireconnect.auth.dto.response.AuthResponse;
 import com.hireconnect.auth.entity.RefreshToken;
 import com.hireconnect.auth.entity.Role;
 import com.hireconnect.auth.entity.UserCredential;
+import com.hireconnect.auth.entity.OtpVerification;
+import com.hireconnect.auth.entity.AuthProvider;
 import com.hireconnect.auth.producer.NotificationEventProducer;
 import com.hireconnect.auth.repository.AuthRepository;
+import com.hireconnect.auth.repository.OtpVerificationRepository;
 import com.hireconnect.auth.repository.PasswordResetOtpRepository;
+import com.hireconnect.auth.repository.RefreshTokenRepository;
 import com.hireconnect.auth.security.JwtService;
+import com.hireconnect.auth.client.NotificationServiceClient;
 import com.hireconnect.auth.service.RefreshTokenService;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,6 +58,15 @@ public class AuthServiceImplTest {
     @Mock
     private NotificationEventProducer notificationEventProducer;
 
+    @Mock
+    private RefreshTokenRepository refreshTokenRepository;
+
+    @Mock
+    private OtpVerificationRepository otpVerificationRepository;
+
+    @Mock
+    private NotificationServiceClient notificationServiceClient;
+
     @InjectMocks
     private AuthServiceImpl authService;
 
@@ -68,11 +82,13 @@ public class AuthServiceImplTest {
         user.setEmail("test@example.com");
         user.setPasswordHash("hashedPassword");
         user.setRole(Role.CANDIDATE);
+        user.setProvider(AuthProvider.LOCAL);
         user.setIsActive(true);
 
         registerRequest = new RegisterRequest();
         registerRequest.setEmail("test@example.com");
         registerRequest.setPassword("password");
+        registerRequest.setOtp("123456");
         registerRequest.setRole(Role.CANDIDATE);
 
         loginRequest = new LoginRequest();
@@ -87,6 +103,12 @@ public class AuthServiceImplTest {
     @Test
     void register_Success() {
         when(authRepository.existsByEmail("test@example.com")).thenReturn(false);
+        OtpVerification otpVerification = OtpVerification.builder()
+                .email("test@example.com")
+                .otp("123456")
+                .expiresAt(java.time.LocalDateTime.now().plusMinutes(5))
+                .build();
+        when(otpVerificationRepository.findByEmail("test@example.com")).thenReturn(Optional.of(otpVerification));
         when(passwordEncoder.encode("password")).thenReturn("hashedPassword");
         when(authRepository.save(any(UserCredential.class))).thenReturn(user);
         when(jwtService.generateToken(user)).thenReturn("access_token_string");
@@ -196,6 +218,7 @@ public class AuthServiceImplTest {
         when(authRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
         when(passwordResetOtpRepository.findTopByEmailAndOtpAndUsedFalseOrderByIdDesc("test@example.com", "123456")).thenReturn(Optional.of(otp));
         when(passwordEncoder.encode("newPass")).thenReturn("hashedNewPass");
+        when(refreshTokenRepository.findByUser(user)).thenReturn(Optional.empty());
 
         authService.resetPassword(request);
 

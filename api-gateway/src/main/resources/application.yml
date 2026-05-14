@@ -74,6 +74,11 @@ spring:
               predicates:
                 - Path=/api/analytics/**
 
+            - id: subscription-service
+              uri: lb://SUBSCRIPTION-SERVICE
+              predicates:
+                - Path=/api/subscriptions/**
+
             - id: auth-service-docs
               uri: lb://AUTH-SERVICE
               predicates:
@@ -130,6 +135,13 @@ spring:
               filters:
                 - SetPath=/v3/api-docs
 
+            - id: subscription-service-docs
+              uri: lb://SUBSCRIPTION-SERVICE
+              predicates:
+                - Path=/aggregate/subscription/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+
 eureka:
   instance:
     prefer-ip-address: true
@@ -150,6 +162,8 @@ management:
     health:
       show-details: always
 jwt:
+  # Must match auth-service JWT secret exactly, otherwise every protected API
+  # call will fail after login with "Invalid or expired token".
   secret: ${JWT_SECRET}
   expiration: 86400000
 
@@ -184,3 +198,5 @@ springdoc:
         url: /aggregate/payment/v3/api-docs
       - name: analytics-service
         url: /aggregate/analytics/v3/api-docs
+      - name: subscription-service
+        url: /aggregate/subscription/v3/api-docs

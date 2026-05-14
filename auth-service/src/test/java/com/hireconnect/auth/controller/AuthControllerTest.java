@@ -12,19 +12,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hireconnect.auth.dto.request.ForgotPasswordRequest;
@@ -35,48 +28,28 @@ import com.hireconnect.auth.dto.request.ResetPasswordRequest;
 import com.hireconnect.auth.dto.response.AuthResponse;
 import com.hireconnect.auth.dto.response.TokenValidationResponse;
 import com.hireconnect.auth.entity.Role;
-import com.hireconnect.auth.security.SecurityConfig;
+import com.hireconnect.auth.controller.AuthController;
 import com.hireconnect.auth.service.AuthService;
 
-@WebMvcTest(
-    controllers = AuthController.class,
-    excludeAutoConfiguration = {
-        DataSourceAutoConfiguration.class,
-        DataSourceTransactionManagerAutoConfiguration.class,
-        HibernateJpaAutoConfiguration.class
-    },
-    excludeFilters = @ComponentScan.Filter(
-        type = FilterType.ASSIGNABLE_TYPE,
-        classes = SecurityConfig.class
-    )
-)
-@AutoConfigureMockMvc(addFilters = false)
 @ExtendWith(MockitoExtension.class)
-@TestPropertySource(properties = {
-    "spring.datasource.url=",
-    "spring.jpa.hibernate.ddl-auto=none",
-    "eureka.client.enabled=false",
-    "spring.cloud.discovery.enabled=false",
-    "auth.oauth-success-redirect-url=http://localhost:4200/oauth-success",
-    "auth.oauth-failure-redirect-url=http://localhost:4200/oauth-failure",
-    "app.jwt.secret=test-secret-key-for-unit-testing-only-32chars",
-    "app.jwt.expiration=3600000"
-})
 class AuthControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @Mock
     private AuthService authService;
 
-    @Autowired
+    @InjectMocks
+    private AuthController authController;
+
     private ObjectMapper objectMapper;
 
     private AuthResponse authResponse;
 
     @BeforeEach
     void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(authController).build();
+        objectMapper = new ObjectMapper();
         authResponse = AuthResponse.builder()
                 .accessToken("dummy-access-token")
                 .refreshToken("dummy-refresh-token")
@@ -88,6 +61,7 @@ class AuthControllerTest {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("john.doe@example.com");
         request.setPassword("password123");
+        request.setOtp("123456");
         request.setRole(Role.CANDIDATE);
 
         when(authService.register(any(RegisterRequest.class))).thenReturn(authResponse);

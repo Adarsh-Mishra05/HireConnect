@@ -38,6 +38,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Transactional
     public SubscriptionResponseDto subscribe(AuthenticatedUser user, SubscribeRequestDto requestDto) {
         validateRecruiter(user);
+        validateSubscriptionPaymentInput(requestDto.getPlan(), requestDto.getPaymentMode(), requestDto.getTransactionId());
 
         subscriptionRepository.findFirstByRecruiterIdAndActiveTrueOrderByCreatedAtDesc(user.userId())
                 .ifPresent(active -> {
@@ -59,7 +60,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 .build();
 
         Subscription saved = subscriptionRepository.save(subscription);
-        createInvoice(saved, amount, requestDto.getPaymentMode(), requestDto.getTransactionId());
+        createInvoice(saved, amount, resolvePaymentModeForInvoice(requestDto.getPlan(), requestDto.getPaymentMode()), requestDto.getTransactionId());
         return toSubscriptionResponse(saved);
     }
 
@@ -185,6 +186,29 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     private int getPlanDurationDays(PlanTier plan) {
         return plan == PlanTier.FREE ? 30 : 30;
+    }
+
+    private void validateSubscriptionPaymentInput(PlanTier plan, com.hireconnect.subscriptionservice.enums.PaymentMode paymentMode,
+                                                  String transactionId) {
+        if (plan == PlanTier.FREE) {
+            return;
+        }
+        if (paymentMode == null) {
+            throw new BadRequestException("Payment mode is required for paid plans");
+        }
+        if (transactionId == null || transactionId.isBlank()) {
+            throw new BadRequestException("Transaction ID is required for paid plans");
+        }
+    }
+
+    private com.hireconnect.subscriptionservice.enums.PaymentMode resolvePaymentModeForInvoice(
+            PlanTier plan,
+            com.hireconnect.subscriptionservice.enums.PaymentMode paymentMode
+    ) {
+        if (plan == PlanTier.FREE) {
+            return com.hireconnect.subscriptionservice.enums.PaymentMode.WALLET;
+        }
+        return paymentMode;
     }
 
     private void validateRecruiter(AuthenticatedUser user) {

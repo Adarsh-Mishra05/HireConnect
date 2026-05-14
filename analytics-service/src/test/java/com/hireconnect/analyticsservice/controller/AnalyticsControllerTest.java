@@ -66,7 +66,7 @@ public class AnalyticsControllerTest {
 
         mockMvc.perform(get("/api/analytics/recruiter/me")
                 .principal(new UsernamePasswordAuthenticationToken(adminUser, null)))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -86,7 +86,7 @@ public class AnalyticsControllerTest {
 
         mockMvc.perform(get("/api/analytics/admin")
                 .principal(new UsernamePasswordAuthenticationToken(recruiterUser, null)))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -108,6 +108,6 @@ public class AnalyticsControllerTest {
 
         mockMvc.perform(get("/api/analytics/admin/export")
                 .principal(new UsernamePasswordAuthenticationToken(recruiterUser, null)))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 }

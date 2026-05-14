@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
+import com.hireconnect.auth.client.NotificationServiceClient;
 import com.hireconnect.auth.entity.AuthProvider;
 import com.hireconnect.auth.entity.RefreshToken;
 import com.hireconnect.auth.entity.Role;
@@ -33,8 +34,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
     private final PasswordEncoder passwordEncoder;
+    private final NotificationServiceClient notificationServiceClient;
     private final String successRedirectUrl;
-    // BUG FIX 6: Was using successRedirectUrl for failure redirects too.
+    
     // Added failureRedirectUrl so OAuth errors send users to the correct page.
     private final String failureRedirectUrl;
 
@@ -43,6 +45,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             JwtService jwtService,
             RefreshTokenService refreshTokenService,
             PasswordEncoder passwordEncoder,
+            NotificationServiceClient notificationServiceClient,
             String successRedirectUrl,
             String failureRedirectUrl
     ) {
@@ -50,6 +53,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         this.jwtService = jwtService;
         this.refreshTokenService = refreshTokenService;
         this.passwordEncoder = passwordEncoder;
+        this.notificationServiceClient = notificationServiceClient;
         this.successRedirectUrl = successRedirectUrl;
         this.failureRedirectUrl = failureRedirectUrl;
     }
@@ -154,6 +158,21 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String accessToken = jwtService.generateToken(user);
         RefreshToken refreshToken = refreshTokenService.createOrUpdateRefreshToken(user);
 
+        // Send login notification email for OAuth users
+        try {
+            NotificationServiceClient.LoginNotificationRequestDto loginNotification = 
+                new NotificationServiceClient.LoginNotificationRequestDto();
+            loginNotification.setTo(user.getEmail());
+            loginNotification.setUserName(user.getFullName());
+            loginNotification.setLoginTime(LocalDateTime.now().toString());
+            
+            notificationServiceClient.sendLoginNotification(loginNotification);
+            log.info("OAuth login notification sent to: {} for user: {}", user.getEmail(), user.getFullName());
+        } catch (Exception e) {
+            log.error("Failed to send OAuth login notification email to: {}", user.getEmail(), e);
+            // Continue with OAuth flow even if email fails
+        }
+
         String redirectUrl = successRedirectUrl
                 + "?accessToken=" + encode(accessToken)
                 + "&refreshToken=" + encode(refreshToken.getToken())
@@ -166,7 +185,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 
-    // BUG FIX 6: Now correctly redirects to failureRedirectUrl, not successRedirectUrl
     private String buildFailureUrl(String message) {
         String separator = failureRedirectUrl.contains("?") ? "&" : "?";
         return failureRedirectUrl + separator + "oauthError=" + encode(message);

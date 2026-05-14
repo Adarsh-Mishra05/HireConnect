@@ -42,7 +42,7 @@ public class TrustedHeaderAuthenticationFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 user,
-                                null,
+                                 null,
                                 List.of(new SimpleGrantedAuthority("ROLE_" + role.name()))
                         );
 
