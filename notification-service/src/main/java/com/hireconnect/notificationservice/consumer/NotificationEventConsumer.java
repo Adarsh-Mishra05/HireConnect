@@ -2,7 +2,7 @@ package com.hireconnect.notificationservice.consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 import com.hireconnect.notificationservice.dto.request.NotificationCreateRequestDto;
@@ -19,10 +19,9 @@ public class NotificationEventConsumer {
 
     private final NotificationService notificationService;
 
-    @KafkaListener(
-            topics = "${app.kafka.notification-topic}",
-            groupId = "notification-service-group",
-            containerFactory = "kafkaListenerContainerFactory"
+    @RabbitListener(
+            queues = "${app.rabbitmq.notification-queue}",
+            containerFactory = "rabbitListenerContainerFactory"
     )
     public void consumeNotificationEvent(NotificationEvent event) {
         logger.info(

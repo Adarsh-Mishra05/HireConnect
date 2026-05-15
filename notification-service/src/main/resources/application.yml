@@ -38,15 +38,14 @@ spring:
           writetimeout: 5000
           debug: false
 
-  kafka:
-    bootstrap-servers: localhost:9092
-    consumer:
-      group-id: notification-service-group-2
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: "*"   # ✅ FIX FOR YOUR ISSUE
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    listener:
+      simple:
+        default-requeue-rejected: false
 
 eureka:
   instance:
@@ -72,8 +71,8 @@ logging:
     org.springframework.security: INFO
 
 app:
-  kafka:
-    notification-topic: hireconnect-notifications
+  rabbitmq:
+    notification-queue: ${RABBITMQ_NOTIFICATION_QUEUE:hireconnect-notifications}
 spring.cloud.compatibility-verifier.enabled: false
 
 management:

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import com.hireconnect.applicationservice.enums.NotificationType;
 import com.hireconnect.applicationservice.event.NotificationEvent;
@@ -16,13 +16,13 @@ import com.hireconnect.applicationservice.event.NotificationEvent;
 class NotificationEventProducerTest {
 
     @Mock
-    private KafkaTemplate<String, NotificationEvent> kafkaTemplate;
+    private RabbitTemplate rabbitTemplate;
 
     @InjectMocks
     private NotificationEventProducer producer;
 
     @Test
-    void sendNotification_PublishesEventToExpectedTopic() {
+    void sendNotification_PublishesEventToExpectedQueue() {
         NotificationEvent event = NotificationEvent.builder()
                 .recipientUserId(1L)
                 .recipientEmail("test@example.com")
@@ -34,6 +34,6 @@ class NotificationEventProducerTest {
 
         producer.sendNotification(event);
 
-        verify(kafkaTemplate).send("hireconnect-notifications", event);
+        verify(rabbitTemplate).convertAndSend("hireconnect-notifications", event);
     }
 }

@@ -21,11 +21,11 @@ spring:
       hibernate:
         format_sql: true
 
-  kafka:
-    bootstrap-servers: localhost:9092
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
 
 eureka:
   instance:
@@ -47,8 +47,8 @@ logging:
     path: ../logs/application-service
 
 app:
-  kafka:
-    notification-topic: hireconnect-notifications
+  rabbitmq:
+    notification-queue: ${RABBITMQ_NOTIFICATION_QUEUE:hireconnect-notifications}
 spring.cloud.compatibility-verifier.enabled: false
 
 management:

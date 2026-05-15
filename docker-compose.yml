@@ -1,6 +1,26 @@
 version: '3.8'
 
 services:
+  # RabbitMQ Service
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: hireconnect-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-guest}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - hireconnect-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
   # Redis Service
   redis:
     image: redis:7-alpine
@@ -69,6 +89,7 @@ services:
       - hireconnect-network
 
 volumes:
+  rabbitmq-data:
   redis-data:
   sonarqube_data:
   sonarqube_logs:

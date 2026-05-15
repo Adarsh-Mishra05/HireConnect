@@ -71,9 +71,6 @@
                 <version>3.2.5</version>
                 <configuration>
                     <argLine>@{argLine} -Dnet.bytebuddy.experimental=true</argLine>
-                    <systemPropertyVariables>
-                        <mockito.mock-maker>subclass</mockito.mock-maker>
-                    </systemPropertyVariables>
                 </configuration>
             </plugin>
 

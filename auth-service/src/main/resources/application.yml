@@ -25,6 +25,12 @@ spring:
       hibernate:
         format_sql: true
 
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
   security:
     oauth2:
       client:
@@ -62,19 +68,14 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka/
 
-# BUG FIX 5: Removed the duplicate app.jwt.* block that was never read by any
-# @Value annotation. JwtService uses jwt.secret and jwt.expiration (this block).
-# Having two blocks with the same defaults caused confusion about which was active.
 jwt:
-  # IMPORTANT: In production, always override JWT_SECRET with a strong random
-  # secret of at least 32 characters (256 bits for HMAC-SHA256).
   secret: ${JWT_SECRET}
-  expiration: 86400000        # 24 hours in milliseconds — access token TTL
-  refresh-expiration: 604800000  # 7 days in milliseconds — refresh token TTL
+  expiration: 86400000
+  refresh-expiration: 604800000
 
 app:
-  kafka:
-    notification-topic: hireconnect-notifications
+  rabbitmq:
+    notification-queue: ${RABBITMQ_NOTIFICATION_QUEUE:hireconnect-notifications}
 
 logging:
   file:

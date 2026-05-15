@@ -29,3 +29,4 @@ public interface NotificationServiceClient {
         private String loginTime;
     }
 }
+

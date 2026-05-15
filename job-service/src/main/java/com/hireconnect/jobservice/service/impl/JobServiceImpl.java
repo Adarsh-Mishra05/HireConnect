@@ -2,6 +2,8 @@ package com.hireconnect.jobservice.service.impl;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +36,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = {"jobs", "featuredJobs"}, allEntries = true)
     public JobResponseDto createJob(Long userId, Role role, JobRequestDto requestDto) {
         log.info("Creating job for recruiterId={} with title={}", userId, requestDto.getTitle());
         validateRecruiter(role);
@@ -47,6 +50,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = {"jobs", "featuredJobs"}, allEntries = true)
     public JobResponseDto updateJob(Long jobId, Long userId, Role role, JobRequestDto requestDto) {
         log.info("Updating jobId={} for recruiterId={}", jobId, userId);
         validateRecruiter(role);
@@ -72,6 +76,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = {"jobs", "featuredJobs"}, allEntries = true)
     public void deleteJob(Long jobId, Long userId, Role role) {
         log.info("Deleting jobId={} for recruiterId={}", jobId, userId);
         validateRecruiter(role);
@@ -97,6 +102,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "jobs", key = "'openJobs'")
     public List<JobResponseDto> getAllOpenJobs() {
         log.info("Fetching all open jobs");
         return jobRepository.findAll()
@@ -121,6 +127,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "jobs", key = "'openJob:' + #jobId")
     public JobResponseDto getOpenJobById(Long jobId) {
         log.info("Fetching open job details for jobId={}", jobId);
         Job job = jobRepository.findById(jobId)
@@ -205,6 +212,7 @@ public class JobServiceImpl implements JobService {
     
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "featuredJobs", allEntries = true)
     public void markAsFeatured(Long jobId, Long recruiterId, Role role) {
         log.info("Marking job as featured for jobId={} by recruiterId={}", jobId, recruiterId);
         validateRecruiter(role);
@@ -217,13 +225,15 @@ public class JobServiceImpl implements JobService {
         jobRepository.save(job);
         log.info("Job marked as featured successfully for jobId={} by recruiterId={}", jobId, recruiterId);
     }
+    
 
     @Override
     @Transactional(readOnly = true)
     public long countAllJobs() {
         return jobRepository.count();
     }
-
+ 
+    
     @Override
     @Transactional
     public void saveJobForCandidate(Long jobId, Long userId, Role role) {
@@ -273,6 +283,7 @@ public class JobServiceImpl implements JobService {
                 .map(jobMapper::toResponseDto)
                 .toList();
     }
+    
 
     @Override
     @Transactional

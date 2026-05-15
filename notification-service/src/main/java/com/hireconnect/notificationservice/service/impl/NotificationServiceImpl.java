@@ -25,7 +25,7 @@ import com.hireconnect.notificationservice.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
 
-// Handles notification creation from Kafka events and user management (read/delete).
+// Handles notification creation from RabbitMQ events and user management (read/delete).
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {

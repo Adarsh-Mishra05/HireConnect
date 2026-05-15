@@ -3,7 +3,8 @@ package com.hireconnect.interviewservice.producer;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.hireconnect.interviewservice.event.NotificationEvent;
@@ -14,15 +15,16 @@ public class NotificationEventProducer {
 
     private static final Logger logger = LoggerFactory.getLogger(NotificationEventProducer.class);
 
-    private final KafkaTemplate<String, NotificationEvent> kafkaTemplate;
+    private final RabbitTemplate rabbitTemplate;
 
-    private final String topic = "hireconnect-notifications";
+    @Value("${app.rabbitmq.notification-queue}")
+    private String queue;
 
     public void sendNotification(NotificationEvent event) {
         logger.info("Publishing notification event for userId={}, type={}",
                 event.getRecipientUserId(), event.getType());
 
-        kafkaTemplate.send(topic, event);
+        rabbitTemplate.convertAndSend(queue, event);
 
         logger.info("Notification event published successfully for userId={}", event.getRecipientUserId());
     }
