@@ -26,8 +26,8 @@ import com.hireconnect.profileservice.service.ResumeParsingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-// [Disha Gujar] : Service implementation for user profile and resume management.
-// [Disha Gujar] : Supports profile CRUD, candidate previews, and secure resume upload/download for recruiters.
+// [Adarsh Mishra] : Service implementation for user profile and resume management.
+// [Adarsh Mishra] : Supports profile CRUD, candidate previews, and secure resume upload/download for recruiters.
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -41,9 +41,9 @@ public class ProfileServiceImpl implements ProfileService {
     private final ApplicationServiceClient applicationServiceClient;
     private final ResumeParsingService resumeParsingService;
 
-    // [Disha Gujar] : PROFILE MANAGEMENT SECTION — Handles core profile data operations.
+    // [Adarsh Mishra] : PROFILE MANAGEMENT SECTION — Handles core profile data operations.
 
-    // [Disha Gujar] : Creates a new profile for a candidate or recruiter if it doesn't already exist.
+    // [Adarsh Mishra] : Creates a new profile for a candidate or recruiter if it doesn't already exist.
     @Override
     public ProfileResponseDto createProfile(Long userId, Role role, ProfileRequestDto requestDto) {
         log.info("Create profile request received | userId={} | role={}", userId, role);
@@ -60,7 +60,7 @@ public class ProfileServiceImpl implements ProfileService {
         return profileMapper.toProfileResponseDto(savedProfile);
     }
 
-    // [Disha Gujar] : Retrieves the authenticated user's profile, auto-creating a blank one if missing.
+    // [Adarsh Mishra] : Retrieves the authenticated user's profile, auto-creating a blank one if missing.
     @Override
     public ProfileResponseDto getProfileByUserId(AuthenticatedUser user) {
         Long userId = user.getUserId();
@@ -102,7 +102,7 @@ public class ProfileServiceImpl implements ProfileService {
         return profileMapper.toProfileResponseDto(profile);
     }
 
-    // [Disha Gujar] : Updates existing profile details for the authenticated user.
+    // [Adarsh Mishra] : Updates existing profile details for the authenticated user.
     @Override
     public ProfileResponseDto updateProfile(AuthenticatedUser user, ProfileRequestDto requestDto) {
         Long userId = user.getUserId();
@@ -147,9 +147,9 @@ public class ProfileServiceImpl implements ProfileService {
         return preview;
     }
 
-    // [Disha Gujar] : RESUME MANAGEMENT SECTION — Handles file upload and secure download logic.
+    // [Adarsh Mishra] : RESUME MANAGEMENT SECTION — Handles file upload and secure download logic.
 
-    // [Disha Gujar] : Handles PDF resume uploads and associates them with the user's profile.
+    // [Adarsh Mishra] : Handles PDF resume uploads and associates them with the user's profile.
     @Override
     public String uploadResume(AuthenticatedUser user, MultipartFile file) {
         log.info("Resume upload request | userId={}", user.getUserId());
@@ -218,7 +218,7 @@ public class ProfileServiceImpl implements ProfileService {
                 });
     }
 
-    // [Disha Gujar] : Allows recruiters to download candidate resumes for jobs they own.
+    // [Adarsh Mishra] : Allows recruiters to download candidate resumes for jobs they own.
     @Override
     public Resume getResumeForRecruiter(AuthenticatedUser user, Long candidateId, Long jobId) {
         log.info("Recruiter resume access request | recruiterId={} | candidateId={} | jobId={}",
@@ -256,10 +256,10 @@ public class ProfileServiceImpl implements ProfileService {
                 });
     }
 
-    // [Disha Gujar] : HELPER METHODS SECTION — Internal utility logic for service operations.
+    // [Adarsh Mishra] : HELPER METHODS SECTION — Internal utility logic for service operations.
 
     private Profile getProfileByUser(AuthenticatedUser user) {
-        // [Disha Gujar] : Auto-creates a blank profile if none exists for the user.
+        // [Adarsh Mishra] : Auto-creates a blank profile if none exists for the user.
         return profileRepository.findByUserId(user.getUserId())
                 .orElseGet(() -> {
                     log.info("No profile found for userId={} \u2014 auto-creating during resume upload", user.getUserId());

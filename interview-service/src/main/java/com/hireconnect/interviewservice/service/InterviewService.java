@@ -8,7 +8,7 @@ import com.hireconnect.interviewservice.dto.request.CandidateRescheduleRequestDt
 import com.hireconnect.interviewservice.dto.response.InterviewResponseDto;
 import com.hireconnect.interviewservice.security.AuthenticatedUser;
 
-// [Disha Gujar] : Service interface defining the business logic contract for interview management.
+// [Adarsh Mishra] : Service interface defining the business logic contract for interview management.
 // Covers interview scheduling by recruiters, retrieval for both recruiter and candidate views,
 // detail lookup by interview ID, interview detail updates, and interview cancellation workflows.
 public interface InterviewService {

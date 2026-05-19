@@ -9,7 +9,7 @@ import com.hireconnect.profileservice.entity.Role;
 import com.hireconnect.profileservice.entity.Resume;
 import com.hireconnect.profileservice.security.AuthenticatedUser;
 
-// [Disha Gujar] : Service interface defining the business logic contract for user profile management.
+// [Adarsh Mishra] : Service interface defining the business logic contract for user profile management.
 // Covers profile creation and update for candidates and recruiters, profile retrieval by user ID,
 // candidate preview lookup for recruiters, and resume upload/download with authorization checks.
 public interface ProfileService {

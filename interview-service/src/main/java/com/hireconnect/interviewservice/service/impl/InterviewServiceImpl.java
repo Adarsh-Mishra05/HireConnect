@@ -28,7 +28,7 @@ import com.hireconnect.interviewservice.service.InterviewService;
 
 import lombok.RequiredArgsConstructor;
 
-// [Disha Gujar] : Service implementation for interview scheduling and management.
+// [Adarsh Mishra] : Service implementation for interview scheduling and management.
 // Handles scheduling, updates, and cancellations of interviews with candidate notifications.
 @Service
 @RequiredArgsConstructor
@@ -40,7 +40,7 @@ public class InterviewServiceImpl implements InterviewService {
     private final ApplicationServiceClient applicationServiceClient;
     private final NotificationEventProducer notificationEventProducer;
 
-    // [Disha Gujar] : Schedules a new interview for a shortlisted job application.
+    // [Adarsh Mishra] : Schedules a new interview for a shortlisted job application.
     @Override
     @Transactional
     public InterviewResponseDto scheduleInterview(AuthenticatedUser user, InterviewScheduleRequestDto requestDto) {
@@ -92,7 +92,7 @@ public class InterviewServiceImpl implements InterviewService {
         return mapToResponse(savedInterview);
     }
 
-    // [Disha Gujar] : Retrieves all interviews scheduled by the authenticated recruiter.
+    // [Adarsh Mishra] : Retrieves all interviews scheduled by the authenticated recruiter.
     @Override
     @Transactional(readOnly = true)
     public List<InterviewResponseDto> getRecruiterInterviews(AuthenticatedUser user) {
@@ -109,7 +109,7 @@ public class InterviewServiceImpl implements InterviewService {
         return interviews;
     }
 
-    // [Disha Gujar] : Retrieves all interviews assigned to the authenticated candidate.
+    // [Adarsh Mishra] : Retrieves all interviews assigned to the authenticated candidate.
     @Override
     @Transactional(readOnly = true)
     public List<InterviewResponseDto> getCandidateInterviews(AuthenticatedUser user) {
@@ -151,7 +151,7 @@ public class InterviewServiceImpl implements InterviewService {
         return mapToResponse(interview);
     }
 
-    // [Disha Gujar] : Updates existing interview details (time, link, notes) and status.
+    // [Adarsh Mishra] : Updates existing interview details (time, link, notes) and status.
     @Override
     @Transactional
     public InterviewResponseDto updateInterview(AuthenticatedUser user, Long interviewId, InterviewUpdateRequestDto requestDto) {
@@ -181,7 +181,7 @@ public class InterviewServiceImpl implements InterviewService {
         return mapToResponse(updatedInterview);
     }
 
-    // [Disha Gujar] : Cancels a scheduled interview and notifies the candidate.
+    // [Adarsh Mishra] : Cancels a scheduled interview and notifies the candidate.
     @Override
     @Transactional
     public InterviewResponseDto cancelInterview(AuthenticatedUser user, Long interviewId) {
